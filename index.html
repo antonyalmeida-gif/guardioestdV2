@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Guardiões do Delta — Tower Defense Parnaíba-PI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" >
+  <script src="script.js"></script>
+</head>
+<body>
+  <section id="entry-screen" class="entry-screen" aria-label="Tela inicial do jogo">
+    <canvas id="entry-canvas"></canvas>
+    <div class="entry-vignette" aria-hidden="true"></div>
+
+    <div class="entry-hero">
+      <div class="entry-location-pill">
+        <span class="entry-dot"></span>
+        <span>PARNAÍBA • PIAUÍ • DELTA DAS AMÉRICAS</span>
+        <span class="entry-dot"></span>
+      </div>
+
+      <div class="entry-emblem" aria-hidden="true">
+        <span class="entry-emblem-side" title="Carnaúba - Árvore da Vida">🌴</span>
+        <div class="entry-emblem-core">
+          <span>🐂</span>
+        </div>
+        <span class="entry-emblem-side" title="Barcas do Rio Igaraçu">⛵</span>
+      </div>
+
+      <h1 class="entry-title">
+        <span class="entry-title-top">Guardiões do</span>
+        <span class="entry-title-main">Delta</span>
+      </h1>
+
+      <p class="entry-subtitle">
+        Do <strong>Porto das Barcas</strong> à <strong>Pedra do Sal</strong>, defenda os tesouros naturais e folclóricos da nossa terra.
+      </p>
+
+      <button id="entry-btn-play" type="button" class="entry-btn-play">
+        <span class="entry-play-icon">▶</span>
+        <span>PLAY</span>
+      </button>
+
+      <ul class="entry-badges" aria-label="Cultura parnaibana">
+        <li>🌺 Guarás do Delta</li>
+        <li>🎭 Bumba-Meu-Boi</li>
+        <li>🏛️ Porto das Barcas</li>
+        <li>🌅 Pedra do Sal</li>
+      </ul>
+    </div>
+  </section>
+
+  <div id="app">
+    <!-- CABEÇALHO GLOBAL -->
+    <header class="top-banner">
+      <div class="brand">
+        <span class="brand-badge">PARNAÍBA • PIAUÍ</span>
+        <h1>Guardiões do Delta</h1>
+      </div>
+      <div class="global-trophies" title="Troféus conquistados nos pontos turísticos">
+        <span class="trophy-icon">🏆</span>
+        <span>Troféus: <strong id="global-trophy-count">0 / 7</strong></span>
+      </div>
+    </header>
+
+    <!-- TELA 1: SELEÇÃO DE 4 PERSONAGENS (POOL DE 8) -->
+    <section id="screen-select" class="screen active">
+      <div class="screen-header">
+        <div>
+          <h2>Monte seu Esquadrão de Defesa</h2>
+          <p>Escolha exatamente <strong>4 defensores</strong> entre os 8 disponíveis para proteger os pontos turísticos de Parnaíba.</p>
+        </div>
+        <div class="selection-status">
+          <span id="selected-counter" class="counter-pill">0 / 4 Selecionados</span>
+          <button id="btn-confirm-squad" class="btn btn-primary" disabled>
+            Confirmar Esquadrão →
+          </button>
+        </div>
+      </div>
+
+      <div id="character-pool-grid" class="character-grid">
+        <!-- Renderizado dinamicamente via script.js -->
+      </div>
+    </section>
+
+    <!-- TELA 2: MENU DE FASES (7 PONTOS TURÍSTICOS DE PARNAÍBA) -->
+    <section id="screen-stages" class="screen">
+      <div class="screen-header">
+        <div>
+          <h2>Roteiro Turístico de Parnaíba - PI</h2>
+          <p>Cada nova fase aumenta os atributos dos inimigos em <strong>+5%</strong>. Conquiste todos os 7 troféus!</p>
+        </div>
+        <div class="stage-actions">
+          <button id="btn-edit-squad" class="btn btn-secondary">
+            🛡️ Alterar Esquadrão (4)
+          </button>
+          <button id="btn-reset-progress" class="btn btn-danger-outline" title="Apagar progresso salvo">
+            ↺ Resetar Progresso
+          </button>
+        </div>
+      </div>
+
+      <!-- ESTANTE DE TROFÉUS -->
+      <div class="trophy-shelf-card">
+        <h3>Galeria de Troféus de Parnaíba</h3>
+        <div id="trophy-shelf" class="trophy-shelf">
+          <!-- Renderizado dinamicamente via script.js -->
+        </div>
+      </div>
+
+      <!-- GRADE DAS 7 FASES -->
+      <div id="stages-grid" class="stages-grid">
+        <!-- Renderizado dinamicamente via script.js -->
+      </div>
+    </section>
+
+    <!-- TELA 3: ARENA DE JOGO (CANVAS + HUD + UPGRADES) -->
+    <section id="screen-game" class="screen">
+      <div class="game-hud">
+        <div class="hud-top-row">
+          <div class="hud-left">
+            <button id="btn-back-stages" class="btn btn-secondary btn-sm">← Fases</button>
+            <div class="stage-title-box">
+              <span id="hud-stage-badge" class="mini-badge">Fase 1 / 7</span>
+              <h3 id="hud-stage-name">Porto das Barcas</h3>
+            </div>
+          </div>
+
+          <div class="hud-controls">
+            <button id="btn-speed" class="btn btn-secondary btn-sm" title="Alternar velocidade (1x / 2x)">
+              ⏩ 1x
+            </button>
+            <button id="btn-start-wave" class="btn btn-primary btn-sm">
+              ▶ Onda 1
+            </button>
+          </div>
+        </div>
+
+        <div class="hud-stats">
+          <div class="stat-pill money" title="Dinheiro disponível para construir e evoluir">
+            <span>💰</span>
+            <strong id="hud-money">260</strong>
+          </div>
+          <div class="stat-pill lives" title="Vidas restantes">
+            <span>❤️</span>
+            <strong id="hud-lives">20</strong>
+          </div>
+          <div class="stat-pill wave" title="Onda atual">
+            <span>🌊</span>
+            <span><strong id="hud-wave">0 / 6</strong></span>
+          </div>
+          <div class="stat-pill trophies" title="Troféus conquistados">
+            <span>🏆</span>
+            <strong id="hud-trophies">0 / 7</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÁREA PRINCIPAL: CANVAS + PAINEL LATERAL / INFERIOR -->
+      <div class="game-workspace">
+        <div class="canvas-wrapper">
+          <canvas id="game-canvas" width="900" height="560"></canvas>
+          <div id="placement-hint" class="placement-hint hidden">
+            <span id="placement-hint-text">Toque ou clique no mapa para posicionar</span>
+            <button id="btn-cancel-placement" type="button" class="btn-cancel-mini">✕ Cancelar</button>
+          </div>
+        </div>
+
+        <aside class="game-sidebar">
+          <!-- BARRA DOS 4 PERSONAGENS SELECIONADOS -->
+          <div class="panel-box">
+            <div class="panel-header">
+              <h4>Torres do Esquadrão</h4>
+              <span class="hint-text">Toque ou arraste</span>
+            </div>
+            <div id="active-squad-bar" class="squad-bar">
+              <!-- 4 cards das torres escolhidas -->
+            </div>
+          </div>
+
+          <!-- INSPETOR DA TORRE SELECIONADA (UPGRADES MÁX. 2) -->
+          <div id="tower-inspector" class="panel-box inspector-box">
+            <div id="inspector-empty" class="inspector-empty">
+              <p>Toque ou clique em uma torre posicionada no mapa para ver atributos e aplicar até <strong>2 upgrades</strong>.</p>
+            </div>
+
+            <div id="inspector-content" class="hidden">
+              <div class="inspector-title-row">
+                <div class="insp-header-left">
+                  <div id="insp-avatar" class="insp-avatar"></div>
+                  <div>
+                    <h4 id="insp-name">Pescador do Igaraçu</h4>
+                    <span id="insp-level-badge" class="level-badge">Nível 0 / 2</span>
+                  </div>
+                </div>
+                <button id="btn-close-inspector" type="button" class="icon-close" title="Fechar inspetor">✕</button>
+              </div>
+
+              <div class="insp-stats-grid">
+                <div class="insp-stat">
+                  <small>Dano</small>
+                  <strong id="insp-damage">16</strong>
+                </div>
+                <div class="insp-stat">
+                  <small>Range</small>
+                  <strong id="insp-range">135</strong>
+                </div>
+                <div class="insp-stat">
+                  <small>SPA</small>
+                  <strong id="insp-spa">0.75s</strong>
+                </div>
+              </div>
+
+              <div id="insp-upgrade-box" class="upgrade-card">
+                <div class="upgrade-info">
+                  <strong id="insp-upg-title">Upgrade 1: Arpão de Aço</strong>
+                  <p id="insp-upg-desc">+10 Dano, +15 Range, -0.10s SPA</p>
+                </div>
+                <button id="btn-upgrade-tower" type="button" class="btn btn-upgrade">
+                  Evoluir ($90)
+                </button>
+              </div>
+
+              <button id="btn-sell-tower" type="button" class="btn btn-sell">
+                Vender Torre (+$70)
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- MODAL DE VITÓRIA / DERROTA -->
+    <div id="game-modal" class="modal-backdrop hidden">
+      <div class="modal-card">
+        <div id="modal-icon" class="modal-icon">🏆</div>
+        <h2 id="modal-title">Ponto Turístico Protegido!</h2>
+        <p id="modal-message">Você derrotou todas as ondas e conquistou um troféu exclusivo!</p>
+        <div id="modal-trophy-box" class="modal-trophy-reward hidden">
+          <span>Novo Troféu Desbloqueado:</span>
+          <strong id="modal-trophy-name">Troféu Porto das Barcas</strong>
+        </div>
+        <div class="modal-buttons">
+          <button id="btn-modal-secondary" type="button" class="btn btn-secondary">Voltar ao Mapa</button>
+          <button id="btn-modal-primary" type="button" class="btn btn-primary">Próxima Fase →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
