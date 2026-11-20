@@ -34,6 +34,97 @@
     canvas.height = Math.floor(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
+  /* =========================================================================
+   MÓDULO ISOLADO — SISTEMA DE AUTO-ONDA NAS PARTIDAS
+   ========================================================================= */
+(() => {
+  'use strict';
+
+  const btnAutoWave = document.getElementById('btn-auto-wave');
+  const btnStartWave = document.getElementById('btn-start-wave');
+  const screenGame = document.getElementById('screen-game');
+  const gameModal = document.getElementById('game-modal');
+  const btnBackStages = document.getElementById('btn-back-stages');
+
+  if (!btnAutoWave || !btnStartWave || !screenGame) return;
+
+  let autoWaveEnabled = false;
+  let autoWaveTimer = null;
+
+  function clearPendingAutoWave() {
+    if (autoWaveTimer) {
+      clearTimeout(autoWaveTimer);
+      autoWaveTimer = null;
+    }
+  }
+
+  function updateAutoWaveButtonUI() {
+    btnAutoWave.classList.toggle('is-active', autoWaveEnabled);
+    btnAutoWave.setAttribute('aria-pressed', String(autoWaveEnabled));
+    btnAutoWave.textContent = autoWaveEnabled ? '🔁 Auto: ON' : '🔁 Auto: OFF';
+  }
+
+  function canTriggerNextWave() {
+    const isGameVisible = screenGame.classList.contains('active');
+    const isModalClosed = !gameModal || gameModal.classList.contains('hidden');
+    return autoWaveEnabled && isGameVisible && isModalClosed && !btnStartWave.disabled;
+  }
+
+  function scheduleNextWave(delayMs = 750) {
+    clearPendingAutoWave();
+    if (!canTriggerNextWave()) return;
+
+    autoWaveTimer = setTimeout(() => {
+      autoWaveTimer = null;
+      if (canTriggerNextWave()) {
+        btnStartWave.click();
+      }
+    }, delayMs);
+  }
+
+  btnAutoWave.addEventListener('click', () => {
+    autoWaveEnabled = !autoWaveEnabled;
+    updateAutoWaveButtonUI();
+
+    if (autoWaveEnabled) {
+      scheduleNextWave(120);
+    } else {
+      clearPendingAutoWave();
+    }
+  });
+
+  if (btnBackStages) {
+    btnBackStages.addEventListener('click', () => {
+      autoWaveEnabled = false;
+      clearPendingAutoWave();
+      updateAutoWaveButtonUI();
+    });
+  }
+
+  const waveBtnObserver = new MutationObserver(() => {
+    if (!btnStartWave.disabled && autoWaveEnabled) {
+      scheduleNextWave(750);
+    }
+  });
+  waveBtnObserver.observe(btnStartWave, {
+    attributes: true,
+    attributeFilter: ['disabled']
+  });
+
+  if (gameModal) {
+    const modalObserver = new MutationObserver(() => {
+      if (!gameModal.classList.contains('hidden')) {
+        clearPendingAutoWave();
+      } else if (autoWaveEnabled) {
+        scheduleNextWave(850);
+      }
+    });
+    modalObserver.observe(gameModal, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+  }
+})();
 
   function initEntryEntities() {
     stars.length = 0;
@@ -605,9 +696,9 @@
       icon: '🔱',
       color: '#00a896',
       cost: 100,
-      damage: 16,
+      damage: 18,
       range: 135,
-      spa: 0.75,
+      spa: 0.50,
       pierce: 2,
       projectileType: 'harpoon',
       description: 'Lança arpões velozes que atravessam até 2 balões em linha reta.',
@@ -616,18 +707,18 @@
           name: 'Arpão de Aço Temperado',
           desc: '+10 Dano, +15 Range, -0.10s SPA (perfura 3)',
           cost: 90,
-          damage: 26,
+          damage: 29,
           range: 150,
-          spa: 0.65,
+          spa: 0.45,
           pierce: 3
         },
         {
           name: 'Mestre das Marés',
           desc: '+18 Dano, +20 Range, -0.15s SPA (perfura 4)',
           cost: 165,
-          damage: 44,
+          damage: 47,
           range: 170,
-          spa: 0.50,
+          spa: 0.35,
           pierce: 4
         }
       ]
@@ -640,9 +731,9 @@
       icon: '🌊',
       color: '#0077b6',
       cost: 140,
-      damage: 22,
+      damage: 25,
       range: 120,
-      spa: 1.10,
+      spa: 0.90,
       splashRadius: 58,
       projectileType: 'waveOrb',
       description: 'Dispara esferas de maré que explodem em área ao atingir o alvo.',
@@ -651,16 +742,16 @@
           name: 'Onda Quebrante',
           desc: '+14 Dano, +15 Range, -0.15s SPA, +14 Área',
           cost: 120,
-          damage: 36,
+          damage: 39,
           range: 135,
-          spa: 0.95,
+          spa: 0.75,
           splashRadius: 72
         },
         {
           name: 'Fúria Atlântica',
           desc: '+24 Dano, +20 Range, -0.15s SPA, +18 Área',
           cost: 210,
-          damage: 60,
+          damage: 63,
           range: 155,
           spa: 0.80,
           splashRadius: 90
@@ -675,9 +766,9 @@
       icon: '🤠',
       color: '#d97706',
       cost: 160,
-      damage: 58,
-      range: 265,
-      spa: 1.65,
+      damage: 60,
+      range: 280,
+      spa: 1.30,
       projectileType: 'lassoSniper',
       description: 'Alcance imenso com disparo de precisão devastador contra balões fortes.',
       upgrades: [
@@ -707,9 +798,9 @@
       icon: '🧪',
       color: '#38bdf8',
       cost: 130,
-      damage: 11,
+      damage: 25,
       range: 140,
-      spa: 0.90,
+      spa: 0.70,
       slowFactor: 0.35,
       slowDuration: 2.2,
       projectileType: 'cryo',
@@ -745,9 +836,9 @@
       icon: '🪃',
       color: '#e9c46a',
       cost: 150,
-      damage: 19,
+      damage: 27,
       range: 145,
-      spa: 0.85,
+      spa: 0.60,
       multiCount: 1,
       projectileType: 'boomerang',
       description: 'Arremessa bumerangues de carnaúba que cortam múltiplos inimigos.',
@@ -756,7 +847,7 @@
           name: 'Talho Duplo',
           desc: '+10 Dano, +20 Range, -0.15s SPA (2 bumerangues)',
           cost: 130,
-          damage: 29,
+          damage: 30,
           range: 165,
           spa: 0.70,
           multiCount: 2
@@ -780,9 +871,9 @@
       icon: '💧',
       color: '#2ec4b6',
       cost: 175,
-      damage: 9,
+      damage: 19,
       range: 130,
-      spa: 0.35,
+      spa: 0.30,
       projectileType: 'waterJet',
       description: 'Cadência altíssima de jatos pressurizados da Lagoa do Sobradinho.',
       upgrades: [
@@ -812,9 +903,9 @@
       icon: '🔔',
       color: '#f4a261',
       cost: 180,
-      damage: 26,
+      damage: 33,
       range: 115,
-      spa: 1.30,
+      spa: 1.00,
       stunDuration: 0.35,
       projectileType: 'sonicNova',
       description: 'Emite badaladas que atingem TODOS os inimigos no alcance e atordoam.',
@@ -847,9 +938,9 @@
       icon: '🔥',
       color: '#e76f51',
       cost: 200,
-      damage: 24,
+      damage: 33,
       range: 145,
-      spa: 1.00,
+      spa: 0.75,
       burnDps: 12,
       auraBonus: 0.12,
       projectileType: 'fireSpark',
@@ -1109,13 +1200,13 @@
      3. TIPOS DE INIMIGOS (BLOONS DO DELTA)
      ========================================================================= */
   const ENEMY_TYPES = {
-    red: { name: 'Balão Vermelho', hp: 28, speed: 78, reward: 12, radius: 14, color: '#ef4444' },
-    blue: { name: 'Balão Azul', hp: 52, speed: 92, reward: 17, radius: 15, color: '#3b82f6' },
-    green: { name: 'Balão Verde', hp: 90, speed: 108, reward: 24, radius: 16, color: '#22c55e' },
-    yellow: { name: 'Balão Amarelo', hp: 130, speed: 142, reward: 32, radius: 16, color: '#eab308' },
-    pink: { name: 'Balão Rosa Veloz', hp: 175, speed: 172, reward: 40, radius: 15, color: '#ec4899' },
-    ceramic: { name: 'Balão Cerâmica', hp: 380, speed: 96, reward: 65, radius: 18, color: '#d97706' },
-    dirigible: { name: 'Dirigível Parnaíba', hp: 1350, speed: 56, reward: 190, radius: 26, color: '#7c3aed' }
+    red: { name: 'Balão Vermelho', hp: 22, speed: 60, reward: 12, radius: 14, color: '#ef4444' },
+    blue: { name: 'Balão Azul', hp: 40, speed: 75, reward: 17, radius: 15, color: '#3b82f6' },
+    green: { name: 'Balão Verde', hp: 65, speed: 85, reward: 24, radius: 16, color: '#22c55e' },
+    yellow: { name: 'Balão Amarelo', hp: 80, speed: 110, reward: 32, radius: 16, color: '#eab308' },
+    pink: { name: 'Balão Rosa Veloz', hp: 95, speed: 130, reward: 40, radius: 15, color: '#ec4899' },
+    ceramic: { name: 'Balão Cerâmica', hp: 250, speed: 65, reward: 65, radius: 18, color: '#d97706' },
+    dirigible: { name: 'Dirigível Parnaíba', hp: 2250, speed: 50, reward: 190, radius: 26, color: '#7c3aed' }
   };
 
   /* =========================================================================
@@ -1134,6 +1225,7 @@
     waveInProgress: false,
     gameOver: false,
     speedMultiplier: 1,
+    autoWave: false,
     towers: [],
     enemies: [],
     projectiles: [],
@@ -1204,6 +1296,7 @@
     hudWave: document.getElementById('hud-wave'),
     hudTrophies: document.getElementById('hud-trophies'),
     btnSpeed: document.getElementById('btn-speed'),
+    btnAutoWave: document.getElementById('btn-auto-wave'),
     btnStartWave: document.getElementById('btn-start-wave'),
     canvas: document.getElementById('game-canvas'),
     placementHint: document.getElementById('placement-hint'),
@@ -1334,7 +1427,7 @@
     STAGES.forEach((stage, idx) => {
       const isUnlocked = idx <= state.unlockedStage;
       const hasTrophy = state.trophies.includes(stage.id);
-      const diffPct = Math.round((Math.pow(1.05, idx) - 1) * 100);
+      const diffPct = Math.round((Math.pow(1.015, idx) - 1) * 100);
 
       const card = document.createElement('div');
       card.className = `stage-card ${isUnlocked ? '' : 'locked'}`;
@@ -1389,6 +1482,7 @@
     state.waveInProgress = false;
     state.gameOver = false;
     state.speedMultiplier = 1;
+    state.autoWave = false;
     state.towers = [];
     state.enemies = [];
     state.projectiles = [];
@@ -1401,6 +1495,8 @@
     dom.hudStageBadge.textContent = `Fase ${stageId + 1} / ${STAGES.length}`;
     dom.hudStageName.textContent = stage.name;
     dom.btnSpeed.textContent = '⏩ 1x';
+    dom.btnAutoWave.textContent = '🔁 Auto: OFF';
+    dom.btnAutoWave.classList.remove('active-auto');
     dom.btnStartWave.disabled = false;
     dom.btnStartWave.textContent = '▶ Onda 1';
     dom.gameModal.classList.add('hidden');
@@ -1696,7 +1792,7 @@
     if (state.waveIndex >= stage.waves.length) return;
 
     const waveGroups = stage.waves[state.waveIndex];
-    const difficultyMultiplier = Math.pow(1.05, state.currentStageId);
+    const difficultyMultiplier = Math.pow(1.02, state.currentStageId);
 
     state.spawnQueue = [];
     waveGroups.forEach((group) => {
@@ -1706,7 +1802,7 @@
           type: group.type,
           delay: i === 0 ? 0.25 : group.interval,
           hp: Math.round(template.hp * difficultyMultiplier),
-          speed: template.speed * (1 + state.currentStageId * 0.015),
+          speed: template.speed * (1 + state.currentStageId * 0.010),
           reward: template.reward,
           radius: template.radius,
           color: template.color
@@ -1920,6 +2016,14 @@
         dom.btnStartWave.textContent = `▶ Onda ${state.waveIndex + 1}`;
         updateGameHud();
       }
+      
+      if (state.autoWave) {
+          setTimeout(() => {
+            if (state.autoWave && !state.waveInProgress && !state.gameOver && dom.screenGame.classList.contains('active')) {
+              startNextWave();
+            }
+          }, 650);
+        }
     }
   }
 
@@ -2921,6 +3025,16 @@
     dom.btnSpeed.addEventListener('click', () => {
       state.speedMultiplier = state.speedMultiplier === 1 ? 2 : 1;
       dom.btnSpeed.textContent = `⏩ ${state.speedMultiplier}x`;
+    });
+
+    dom.btnAutoWave.addEventListener('click', () => {
+      state.autoWave = !state.autoWave;
+      dom.btnAutoWave.textContent = state.autoWave ? '🔁 Auto: ON' : '🔁 Auto: OFF';
+      dom.btnAutoWave.classList.toggle('active-auto', state.autoWave);
+
+      if (state.autoWave && !state.waveInProgress && !state.gameOver) {
+        startNextWave();
+      }
     });
 
     dom.btnCancelPlacement.addEventListener('click', cancelPlacement);
