@@ -1206,7 +1206,7 @@
     yellow: { name: 'Balão Amarelo', hp: 80, speed: 110, reward: 32, radius: 16, color: '#eab308' },
     pink: { name: 'Balão Rosa Veloz', hp: 95, speed: 130, reward: 40, radius: 15, color: '#ec4899' },
     ceramic: { name: 'Balão Cerâmica', hp: 250, speed: 65, reward: 65, radius: 18, color: '#d97706' },
-    dirigible: { name: 'Dirigível Parnaíba', hp: 2250, speed: 50, reward: 190, radius: 26, color: '#7c3aed' }
+    dirigible: { name: 'Dirigível Parnaíba', hp: 2000, speed: 50, reward: 190, radius: 26, color: '#7c3aed' }
   };
 
   /* =========================================================================
@@ -1792,7 +1792,7 @@
     if (state.waveIndex >= stage.waves.length) return;
 
     const waveGroups = stage.waves[state.waveIndex];
-    const difficultyMultiplier = Math.pow(1.02, state.currentStageId);
+    const difficultyMultiplier = Math.pow(1.05, state.currentStageId);
 
     state.spawnQueue = [];
     waveGroups.forEach((group) => {
